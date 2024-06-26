@@ -1,7 +1,7 @@
 from core.voice_cloner import VoiceCloner
 from core.dereverb import MDXNetDereverb
 from core.scene_preprocessor import ScenePreprocessor
-from core.face.lipsync import LipSync
+#from core.face.lipsync import LipSync
 from core.helpers import (
     to_segments, 
     to_extended_frames, 
@@ -27,18 +27,34 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 class Engine:
     def __init__(self, config, output_language):
         if not config['HF_TOKEN']:
-            raise Exception('No HuggingFace token providen!')
+            raise Exception('No HuggingFace token provided!')
         self.output_language = output_language
         self.cloner = VoiceCloner(output_language)
         device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.device = torch.device(device_type)
         self.whisper_batch_size = 16
-        self.whisper = load_model('large-v2', device=device_type, compute_type='int8')
+
+        # Configurações adicionais para ASR se necessário
+        asr_options = {
+            'max_new_tokens': 256,  # Suposição de valor, ajuste conforme necessário
+            'clip_timestamps': True,
+            'hallucination_silence_threshold': 0.1,
+            'hotwords': []  # Lista vazia ou preencha conforme necessário
+        }
+
+        # Ajustando a chamada para load_model com parâmetros adicionais
+        self.whisper = load_model(
+            whisper_arch='large-v2', 
+            device=device_type, 
+            compute_type='int8', 
+            asr_options=asr_options
+        )
+
         self.diarize_model = DiarizationPipeline(use_auth_token=config['HF_TOKEN'], device=self.device)
         self.text_helper = TextHelper()
         self.temp_manager = TempFileManager()
         self.scene_processor = ScenePreprocessor(config)
-        self.lip_sync = LipSync()
+        # self.lip_sync = LipSync()  # Descomente se necessário
         self.dereverb = MDXNetDereverb(15)
     
     def __call__(self, video_file_path, output_file_path):

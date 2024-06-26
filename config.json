@@ -3,5 +3,7 @@
     "DET_TRESH": 0.3,
     "DIST_TRESH": 0.2,
     "DB_NAME": "storage.db",
-    "HF_TOKEN": ""
+    "HF_TOKEN": "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",
+    "USE_ENHANCER": false,
+    "ADD_SUBTITLES": false
 }

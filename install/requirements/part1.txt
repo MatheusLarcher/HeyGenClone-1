@@ -2,6 +2,6 @@ TTS==0.17.6
 pyannote.core==5.0.0
 pyannote.database==5.0.1
 pyannote.pipeline==3.0.1
-torchaudio==2.0.2
+torchaudio==2.2.2
 soundfile==0.12.1
-numpy==1.22.0
+numpy<1.24,>=1.22

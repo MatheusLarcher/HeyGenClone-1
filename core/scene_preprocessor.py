@@ -3,11 +3,11 @@ from scenedetect.video_manager import VideoManager
 from scenedetect.scene_manager import SceneManager
 from scenedetect.stats_manager import StatsManager
 from scenedetect.detectors import ContentDetector
-from core.face.detector import FaceDetector
+#from core.face.detector import FaceDetector
 from core.temp_manager import TempFileManager
 from core.dereverb import MDXNetDereverb
-from deepface import DeepFace
-from deepface.commons import distance as dst
+#from deepface import DeepFace
+#from deepface.commons import distance as dst
 from pydub import AudioSegment
 import sqlite3
 import uuid
@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 class ScenePreprocessor:
     def __init__(self, config):
-        self.face_detector = FaceDetector()
+        #self.face_detector = FaceDetector()
         self.dereverb = MDXNetDereverb(15)
         self.temp_manager = TempFileManager()
         self.dist_tresh = config['DIST_TRESH']
@@ -41,9 +41,9 @@ class ScenePreprocessor:
                 if self.is_frame_with_voice(frame_time, voice_segments):
                     voice_frame_ids.append(frame_id)
                     faces = self.face_detector.detect(frame, face_det_tresh=self.face_det_tresh)
-                    for face in faces:
-                        embedding = DeepFace.represent(face[0], enforce_detection=False)[0]['embedding']
-                        self.find_insert_embedding(embedding, frame_id, face[0], face[1])
+                    #for face in faces:
+                        #embedding = DeepFace.represent(face[0], enforce_detection=False)[0]['embedding']
+                        #self.find_insert_embedding(embedding, frame_id, face[0], face[1])
                 frame_id += 1
 
     def is_frame_with_voice(self, frame_time, voice_segments):
@@ -119,14 +119,25 @@ class ScenePreprocessor:
             frames[row[0]] = pickle.loads(row[1])
         return frames
     
-    def find_insert_embedding(self, embedding, frame_id, face, bbox):
-        embeddings_dict = self.get_all_persons_with_embeddings()
-        for person_id, embeddings in embeddings_dict.items():
-            for person_embedding in embeddings:
-                distance = dst.findEuclideanDistance(embedding, person_embedding)
-                if distance <= self.dist_tresh:
-                    self.insert_person_embedding(person_id, embedding, frame_id, face, bbox)
-                    return
+    def find_insert_embedding(self, frame_id, face, bbox):
+        # Aqui você precisará de uma nova lógica para gerar os embeddings e compará-los
+        # Por exemplo, se você estiver usando FaceNet, pode ser algo assim:
+
+        # embedding = self.facenet_model.predict(face) # Este é um exemplo fictício
+
+        # Agora, assumindo que você tenha uma lista de todos os embeddings conhecidos
+        # e seus respectivos IDs de pessoa, você poderia fazer algo assim:
+
+        # for person_id, known_embedding in self.all_known_embeddings.items():
+        #     distance = euclidean_distance(embedding, known_embedding)
+        #     if distance <= self.dist_tresh:
+        #         self.insert_person_embedding(person_id, embedding, frame_id, face, bbox)
+        #         return
+
+        # person_id = self.generate_new_person_id()
+        # self.insert_embedding(person_id, embedding, frame_id, face, bbox)
+
+        pass # Este é apenas um placeholder. Você precisa substituí-lo pela sua lógica real.
         
         person_id = self.generate_new_person_id()
         self.insert_embedding(person_id, embedding, frame_id, face, bbox)

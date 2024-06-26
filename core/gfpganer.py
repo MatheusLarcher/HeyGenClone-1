@@ -2,14 +2,14 @@ import os
 import sys
 import cv2
 import torch
-from basicsr.utils import img2tensor, tensor2img
-from basicsr.utils.download_util import load_file_from_url
-from facexlib.utils.face_restoration_helper import FaceRestoreHelper
-from torchvision.transforms.functional import normalize
+#from basicsr.utils import img2tensor, tensor2img
+#from basicsr.utils.download_util import load_file_from_url
+#from facexlib.utils.face_restoration_helper import FaceRestoreHelper
+#from torchvision.transforms.functional import normalize
 
-from gfpgan.archs.gfpgan_bilinear_arch import GFPGANBilinear
-from gfpgan.archs.gfpganv1_arch import GFPGANv1
-from gfpgan.archs.gfpganv1_clean_arch import GFPGANv1Clean
+# from gfpgan.archs.gfpgan_bilinear_arch import GFPGANBilinear
+# from gfpgan.archs.gfpganv1_arch import GFPGANv1
+# from gfpgan.archs.gfpganv1_clean_arch import GFPGANv1Clean
 
 class GFPGANer():
     """Helper for restoration with GFPGAN.
@@ -34,66 +34,66 @@ class GFPGANer():
         # initialize model
         self.device = device
         # initialize the GFP-GAN
-        if arch == 'clean':
-            self.gfpgan = GFPGANv1Clean(
-                out_size=512,
-                num_style_feat=512,
-                channel_multiplier=channel_multiplier,
-                decoder_load_path=None,
-                fix_decoder=False,
-                num_mlp=8,
-                input_is_latent=True,
-                different_w=True,
-                narrow=1,
-                sft_half=True)
-        elif arch == 'bilinear':
-            self.gfpgan = GFPGANBilinear(
-                out_size=512,
-                num_style_feat=512,
-                channel_multiplier=channel_multiplier,
-                decoder_load_path=None,
-                fix_decoder=False,
-                num_mlp=8,
-                input_is_latent=True,
-                different_w=True,
-                narrow=1,
-                sft_half=True)
-        elif arch == 'original':
-            self.gfpgan = GFPGANv1(
-                out_size=512,
-                num_style_feat=512,
-                channel_multiplier=channel_multiplier,
-                decoder_load_path=None,
-                fix_decoder=True,
-                num_mlp=8,
-                input_is_latent=True,
-                different_w=True,
-                narrow=1,
-                sft_half=True)
-        elif arch == 'RestoreFormer':
-            from gfpgan.archs.restoreformer_arch import RestoreFormer
-            self.gfpgan = RestoreFormer()
+        # if arch == 'clean':
+        #     self.gfpgan = GFPGANv1Clean(
+        #         out_size=512,
+        #         num_style_feat=512,
+        #         channel_multiplier=channel_multiplier,
+        #         decoder_load_path=None,
+        #         fix_decoder=False,
+        #         num_mlp=8,
+        #         input_is_latent=True,
+        #         different_w=True,
+        #         narrow=1,
+        #         sft_half=True)
+        # elif arch == 'bilinear':
+        #     self.gfpgan = GFPGANBilinear(
+        #         out_size=512,
+        #         num_style_feat=512,
+        #         channel_multiplier=channel_multiplier,
+        #         decoder_load_path=None,
+        #         fix_decoder=False,
+        #         num_mlp=8,
+        #         input_is_latent=True,
+        #         different_w=True,
+        #         narrow=1,
+        #         sft_half=True)
+        # elif arch == 'original':
+        #     self.gfpgan = GFPGANv1(
+        #         out_size=512,
+        #         num_style_feat=512,
+        #         channel_multiplier=channel_multiplier,
+        #         decoder_load_path=None,
+        #         fix_decoder=True,
+        #         num_mlp=8,
+        #         input_is_latent=True,
+        #         different_w=True,
+        #         narrow=1,
+        #         sft_half=True)
+        # elif arch == 'RestoreFormer':
+        #     from gfpgan.archs.restoreformer_arch import RestoreFormer
+        #     self.gfpgan = RestoreFormer()
         # initialize face helper
-        self.face_helper = FaceRestoreHelper(
-            upscale,
-            face_size=512,
-            crop_ratio=(1, 1),
-            det_model='retinaface_resnet50',
-            save_ext='png',
-            use_parse=True,
-            device=self.device,
-            model_rootpath=root_dir)
+        # self.face_helper = FaceRestoreHelper(
+        #     upscale,
+        #     face_size=512,
+        #     crop_ratio=(1, 1),
+        #     det_model='retinaface_resnet50',
+        #     save_ext='png',
+        #     use_parse=True,
+        #     device=self.device,
+        #     model_rootpath=root_dir)
 
-        if model_path.startswith('https://'):
-            model_path = load_file_from_url(url=model_path, model_dir=root_dir, progress=True, file_name=None)
-            # Set permission if windows on gfpgan files
-            if sys.platform == 'win32':
-                try:
-                    cmd = f'icacls "{model_path}" /grant:r "Users:(R,W)" /T'
-                    os.system(cmd)
-                except Exception as e:
-                    print(e)
-        loadnet = torch.load(model_path)
+        # if model_path.startswith('https://'):
+        #     model_path = load_file_from_url(url=model_path, model_dir=root_dir, progress=True, file_name=None)
+        #     # Set permission if windows on gfpgan files
+        #     if sys.platform == 'win32':
+        #         try:
+        #             cmd = f'icacls "{model_path}" /grant:r "Users:(R,W)" /T'
+        #             os.system(cmd)
+        #         except Exception as e:
+        #             print(e)
+        # loadnet = torch.load(model_path)
         if 'params_ema' in loadnet:
             keyname = 'params_ema'
         else:
@@ -117,22 +117,22 @@ class GFPGANer():
             self.face_helper.align_warp_face()
 
         # face restoration
-        for cropped_face in self.face_helper.cropped_faces:
-            # prepare data
-            cropped_face_t = img2tensor(cropped_face / 255., bgr2rgb=True, float32=True)
-            normalize(cropped_face_t, (0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=True)
-            cropped_face_t = cropped_face_t.unsqueeze(0).to(self.device)
+        # for cropped_face in self.face_helper.cropped_faces:
+        #     # prepare data
+        #     cropped_face_t = img2tensor(cropped_face / 255., bgr2rgb=True, float32=True)
+        #     #normalize(cropped_face_t, (0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=True)
+        #     cropped_face_t = cropped_face_t.unsqueeze(0).to(self.device)
 
-            try:
-                output = self.gfpgan(cropped_face_t, return_rgb=False, weight=weight)[0]
-                # convert to image
-                restored_face = tensor2img(output.squeeze(0), rgb2bgr=True, min_max=(-1, 1))
-            except RuntimeError as error:
-                print(f'\tFailed inference for GFPGAN: {error}.')
-                restored_face = cropped_face
+        #     try:
+        #         output = self.gfpgan(cropped_face_t, return_rgb=False, weight=weight)[0]
+        #         # convert to image
+        #         restored_face = tensor2img(output.squeeze(0), rgb2bgr=True, min_max=(-1, 1))
+        #     except RuntimeError as error:
+        #         print(f'\tFailed inference for GFPGAN: {error}.')
+        #         restored_face = cropped_face
 
-            restored_face = restored_face.astype('uint8')
-            self.face_helper.add_restored_face(restored_face)
+        #     restored_face = restored_face.astype('uint8')
+        #     self.face_helper.add_restored_face(restored_face)
 
         if not has_aligned and paste_back:
             # upsample the background
